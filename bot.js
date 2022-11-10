@@ -10,12 +10,12 @@ const leetcodeApiUrl = 'https://leetcode.com/api/problems/all/';
 let totalProblems = 0;
 
 function Problem(problemObject) {
-	this.id = problemObject.stat.question_id;
-	this.title = problemObject.stat.question__title;
-	this.titleSlug = problemObject.stat.question__title_slug;
-	this.difficulty = problemObject.difficulty.level === 3 ? 'Hard' : problemObject.difficulty.level === 2 ? 'Medium' : 'Easy';
-	this.paidOnly = problemObject.paid_only;
-	this.description = `Problem ID: ${this.id}\nTitle: ${this.title}\nSlug Title: ${this.titleSlug}\nDifficulty: ${this.difficulty}\nIs Paid? ${this.paidOnly}`;
+  this.id = problemObject.stat.question_id;
+  this.title = problemObject.stat.question__title;
+  this.titleSlug = problemObject.stat.question__title_slug;
+  this.difficulty = problemObject.difficulty.level === 3 ? 'Hard' : problemObject.difficulty.level === 2 ? 'Medium' : 'Easy';
+  this.paidOnly = problemObject.paid_only;
+  this.description = `Problem ID: ${this.id}\nTitle: ${this.title}\nSlug Title: ${this.titleSlug}\nDifficulty: ${this.difficulty}\nIs Paid? ${this.paidOnly}`;
 }
 
 function sendProblem(msg, difficulty) {
@@ -29,23 +29,18 @@ function sendProblem(msg, difficulty) {
   const problemUrl = `${leetcodeProblemUrl}${problem.titleSlug}/`;
   const embed = new EmbedBuilder()
     .setTitle(problem.title)
-		.setColor('#f89f1b')
-		.setThumbnail('https://leetcode.com/static/images/LeetCode_logo_rvs.png')
-		.setDescription(`${problem.difficulty} - ${problem.title}`)
-		.setURL(problemUrl);
-
+    .setColor('#f89f1b')
+    .setThumbnail('https://leetcode.com/static/images/LeetCode_logo_rvs.png')
+    .setDescription(`${problem.difficulty} - ${problem.title}`)
+    .setURL(problemUrl);
   msg.channel.send({ embeds: [embed]});
 }
 
 axios.get(leetcodeApiUrl)
   .then((resp) => {
     totalProblems = resp.data.num_total;
-      resp.data.stat_status_pairs.filter(x => !x.paid_only).forEach((problem) => {
-			  problems.push(new Problem(problem));
-		});
-	}).catch((err) => {
-		console.log(err);
-	});
+    resp.data.stat_status_pairs.filter(x => !x.paid_only).forEach((problem) => { problems.push(new Problem(problem)); });
+  }).catch((err) => { console.log(err); });
 
 bot.on(Events.ClientReady, () => { console.log(`Logged in as ${bot.user.username}`); });
 bot.on(Events.Error, (err) => { console.error(err); });
