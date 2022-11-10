@@ -15,7 +15,6 @@ Discord bot that posts a random [leetcode](https://leetcode.com/) question based
 
 ### Usage
 
-##### Regular Commands
-
 `!problem (without args) - gives you a random problem of any difficulty either paid/free.`
+
 `!problem <'easy' | 'medium' | 'hard'> - gives you a random freely accessible problem of any difficulty.`
