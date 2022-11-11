@@ -55,6 +55,15 @@ bot.on(Events.MessageCreate, (msg) => {
     let difficulty = -1;
 
     if (typeof args[0] != undefined) {
+      if (args[0].toLowerCase() === 'help') {
+        msg.channel.send(
+          '```Usage:\n\n\t!problem (without args) - gives you a random problem of any difficulty either paid/free.' +
+          '\n\nAdding difficulty modifiers:\n\n\t!problem <easy | medium | hard> - lets you pick a random free problem of the chosen difficulty.```',
+        );
+
+        return;
+      }
+
       if (levels.indexOf(args[0].toLowerCase()) > -1) {
         difficulty = args[0].toLowerCase();
       }

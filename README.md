@@ -8,7 +8,7 @@ Discord bot that posts a random [leetcode](https://leetcode.com/) question based
 3. `npm i` or `npm install` to get all its dependencies
 4. Create a `.env` file at the root of the project folder
 5. Add a variable `DISCORD_BOT_TOKEN=` and leave it empty for now.
-6. Now make sure to create a `New Application` on Discord from their [portal](https://discord.com/developers/applications/)
+6. Now make suu e to create a `New Application` on Discord from their [portal](https://discord.com/developers/applications/)
     - once created, visit its `Bot` tab and grab the `token` and paste it as the value for `DISCORD_BOT_TOKEN`
 7. Run the bot using `npm start` and you should be able to use the commands once you invite your own app to a server of your choice.
 
