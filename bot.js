@@ -1,8 +1,8 @@
-const { Client, Events, EmbedBuilder, GatewayIntentBits } = require('discord.js');
+const { Client, Events, EmbedBuilder, GatewayIntentBits, messageLink } = require('discord.js');
 const axios = require('axios');
 const bot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 
-const prefix = '!problem';
+const prefix = ['!p', '!problem'];
 const levels = ['easy', 'medium', 'hard'];
 const problems = [];
 const leetcodeProblemUrl = 'https://leetcode.com/problems/';
@@ -49,6 +49,13 @@ function sendProblems(msg, difficulty, amount = 1) {
   }
 }
 
+const sanitizeAndConvertToArray = (value) => value.replace(/[^0-9,]/g, '').split(',').map(Number);
+function removeDuplicates(value) {
+  const results = value.filter(x => !completedProblems.includes(x));
+
+  return [...results];
+}
+
 axios.get(leetcodeApiUrl)
   .then((resp) => {
     totalProblems = resp.data.num_total;
@@ -63,7 +70,7 @@ bot.on(Events.MessageCreate, (msg) => {
     bot.createMessage(msg.channel.id, 'Pong!');
   }
 
-  if (msg.content.startsWith(prefix)) {
+  if (msg.content.startsWith(prefix[0]) || msg.content.startsWith(prefix[1])) {
     const args = msg.content.slice(prefix.length).trim().split(' ');
     let difficulty = -1;
     let amount = 1;
@@ -71,10 +78,31 @@ bot.on(Events.MessageCreate, (msg) => {
     if (typeof args[0] != undefined) {
       if (args[0].toLowerCase() === 'help') {
         msg.channel.send(
-          '```Usage:\n\n\t!problem (without args) - gives you a random problem of any difficulty either paid/free.' +
-          '\n\nAdding difficulty modifiers:\n\n\t!problem <easy | medium | hard> - lets you pick a random free problem of the chosen difficulty.' +
-          '\n\nAdding amount modifier:\n\n\t!problem <easy | medium | hard> <1-4> - lets you pick a specified number of random free problem (max 4) of the chosen difficulty.```',
+          '```Usage:\n\n\t!problem | !p (without args) - gives you a random problem of any difficulty either paid/free.' +
+          '\n\nAdding difficulty modifiers:\n\n\t!problem | !p <easy | medium | hard> - lets you pick a random free problem of the chosen difficulty.' +
+          '\n\nAdding amount modifier:\n\n\t!problem | !p <easy | medium | hard> <1-4> - lets you pick a specified number of random free problem (max 4) of the chosen difficulty.```',
         );
+
+        return;
+      }
+
+      if (args[0].toLowerCase() === 'cache') {
+        msg.channel.send(`Completed problem ids:\n \`\`\`[${completedProblems}]\`\`\``);
+        return;
+      }
+
+      if (args[0].toLowerCase() === 'set') {
+        const argument = sanitizeAndConvertToArray(args[1]);
+        if (argument != null && argument.length > 0) {
+          const newProblems = removeDuplicates(argument);
+          if (newProblems.length > 0) {
+            completedProblems.push(...newProblems);
+          }
+
+          msg.channel.send(`Set new completed problem ids:\n \`\`\`[${completedProblems}]\`\`\``);
+        } else {
+          msg.channel.send('Improper arugment provided.');
+        }
 
         return;
       }
@@ -83,10 +111,9 @@ bot.on(Events.MessageCreate, (msg) => {
         difficulty = args[0].toLowerCase();
       }
 
-      if (levels.indexOf(args[1].toLowerCase()) > -1 && Number(args[1]) !== 'NaN') {
+      if (args[1] != null && levels.indexOf(args[1].toLowerCase()) > -1 && Number(args[1]) !== 'NaN') {
         difficulty = args[1].toLowerCase();
       }
-
 
       if (Number(args[0])) {
         amount = Math.min(Number(args[0]), 4);
