@@ -1,4 +1,4 @@
-const { Client, Events, EmbedBuilder, GatewayIntentBits, messageLink } = require('discord.js');
+const { Client, Events, EmbedBuilder, GatewayIntentBits, ShardEvents, WebSocketShardEvents } = require('discord.js');
 const axios = require('axios');
 const bot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 
@@ -8,6 +8,8 @@ const problems = [];
 const leetcodeProblemUrl = 'https://leetcode.com/problems/';
 const leetcodeApiUrl = 'https://leetcode.com/api/problems/all/';
 const completedProblems = [];
+const owner = process.env.DISCORD_BOT_OWNERID;
+
 let totalProblems = 0;
 
 function Problem(problemObject) {
@@ -56,6 +58,13 @@ function removeDuplicates(value) {
   return [...results];
 }
 
+function sendOwnerCachedValues() {
+  console.log('sending owner cached values');
+  client.users.fetch(owner, false).then((user) => {
+    user.send(`Completed problem ids:\n \`\`\`[${completedProblems}]\`\`\``);
+  });
+}
+
 axios.get(leetcodeApiUrl)
   .then((resp) => {
     totalProblems = resp.data.num_total;
@@ -63,7 +72,9 @@ axios.get(leetcodeApiUrl)
   }).catch((err) => { console.log(err); });
 
 bot.on(Events.ClientReady, () => { console.log(`Logged in as ${bot.user.username}`); });
-bot.on(Events.Error, (err) => { console.error(err); });
+bot.on(Events.Error, (err) => { sendOwnerCachedValues(); console.error(err); });
+bot.on(ShardEvents.Disconnect, (err) => { sendOwnerCachedValues(); console.log(err); });
+bot.on(WebSocketShardEvents.Destroyed, (err) => { sendOwnerCachedValues(); console.log(err); });
 bot.on(Events.MessageCreate, (msg) => {
   if (msg.author.bot) return;
   if (msg.content === '!ping') {
